@@ -10,7 +10,7 @@ cargo install --locked cargo-watch # on windows
 ```
 
 ```bash
-cargo watch -q -c -w src/ -x run
+cargo watch -q -c -w src/ -w .cargo/ -x run
 ```
 
 #### Client side:
@@ -19,6 +19,17 @@ cargo watch -q -c -w src/ -x run
 cargo watch -q -c -w tests/ -x "test -q quick_dev -- --nocapture"
 ```
 
+#### Start db
+
+```bash
+docker run -d --rm --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=welcome postgres:15
+```
+
+start pg terminal
+
+```bash
+docker exec -it -u postgres postgres psql
+```
 
 ## Build
 

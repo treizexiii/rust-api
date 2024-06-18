@@ -1,0 +1,6 @@
+# Environment variables for cargo commands
+
+[env]
+RUST_LOG="webapi=debug"
+#RUST_BACKTRACE="1"
+SERVICE_WEB_FOLDER="web-folder/"

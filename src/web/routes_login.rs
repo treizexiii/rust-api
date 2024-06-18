@@ -3,6 +3,7 @@ use axum::routing::post;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tower_cookies::{Cookie, Cookies};
+use tracing::log::debug;
 
 use crate::{Error, Result};
 use crate::web::AUTH_TOKEN;
@@ -12,7 +13,7 @@ pub fn routes() -> Router {
 }
 
 async fn api_login(cookies: Cookies, payload: Json<LoginPayload>) -> Result<Json<Value>> {
-    println!("->> {:<12} - api_login", "HANDLER");
+    debug!("{:<12} - api_login", "HANDLER");
 
     if payload.username != "demo" || payload.password != "azerty" {
         return Err(Error::LoginFail)

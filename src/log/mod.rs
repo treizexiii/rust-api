@@ -3,6 +3,7 @@ use axum::http::{Method, Uri};
 use serde_json::{json, Value};
 use serde_with::serde_derive::Serialize;
 use serde_with::skip_serializing_none;
+use tracing::log::debug;
 use uuid::Uuid;
 use crate::{Error, Result};
 use crate::ctx::Ctx;
@@ -56,7 +57,7 @@ pub async fn log_request(
         error_data,
     };
 
-    println!("  ->> log_request: \n{}", json!(log_line));
+    debug!("LOG_REQUEST: \n{}", json!(log_line));
 
     Ok(())
 }

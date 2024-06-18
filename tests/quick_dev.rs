@@ -33,5 +33,9 @@ async fn quick_dev() -> Result<()> {
 
     client.do_get("/api/tickets").await?.print().await?;
 
+    client.do_get("/not-found").await?.print().await?;
+
+    client.do_get("/index.html").await?.print().await?;
+
     Ok(())
 }
