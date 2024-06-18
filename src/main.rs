@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
         .layer(CookieManagerLayer::new())
         .fallback_service(routes_static());
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
     println!("->> LISTENING on {addr}\n");
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
