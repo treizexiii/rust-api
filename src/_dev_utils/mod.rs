@@ -8,15 +8,13 @@ pub async fn init_dev() {
     static INIT: OnceCell<()> = OnceCell::const_new();
 
     INIT.get_or_init(|| async {
-        info!("{:<12} - init_dev", "FOR-DEV-ONLY");
-
         let d = dev_db::init_dev_db().await;
         match d {
             Ok(_) => {
-                println!("Database initialized");
+                info!("{:<12} - Database initialized", "FOR-DEV-ONLY");
             }
             Err(e) => {
-                println!("Error: {}", e.to_string());
+                info!("{:<12} - Database error:{e:?}", "FOR-DEV-ONLY");
             }
         }
     })
