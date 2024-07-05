@@ -1,6 +1,13 @@
-# Environment variables for cargo commands
+# Environment variables for cargo commands ONLY
+# For deployment environment variables, use .env file or container management tools
 
 [env]
-RUST_LOG="webapi=debug"
 #RUST_BACKTRACE="1"
+
+RUST_LOG="webapi=debug"
+
+# -- SECRETS
+SERVICE_DB_URL="postgres://app_user:dev_only_pwd@localhost:5434/app_db"
+
+# -- CONFIGURATION
 SERVICE_WEB_FOLDER="web-folder/"

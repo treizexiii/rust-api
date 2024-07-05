@@ -27,7 +27,7 @@ use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
 use crate::ctx::Ctx;
 use crate::log::log_request;
-use crate::model::ModelController;
+use crate::model::{ModelManager};
 use crate::web::routes_static::{route_hello, serve_dir};
 
 #[tokio::main]
@@ -41,22 +41,25 @@ async fn main() -> Result<()> {
     // -- FOR DEV ONLY
     _dev_utils::init_dev().await;
 
-    //Initialize controllers
-    let mc = ModelController::new().await?;
+    // Initialize managers
+    let mm = ModelManager::new().await?;
 
-    let routes_api = web::routes_tickets::routes(mc.clone())
-        .route_layer(middleware::from_fn(web::mw_auth::mw_require_auth));
+    // Initialize controllers
+    // let mc = ModelController::new().await?;
+    //
+    // let routes_api = web::routes_tickets::routes(mc.clone())
+    //     .route_layer(middleware::from_fn(web::mw_auth::mw_require_auth));
 
     // register routes
     let routes_all = Router::new()
         .merge(route_hello())
         .merge(web::routes_login::routes())
-        .nest("/api", routes_api)
+        // .nest("/api", routes_api)
         .layer(middleware::map_response(main_response_mapper))
-        .layer(middleware::from_fn_with_state(
-            mc.clone(),
-            web::mw_auth::mw_ctx_resolver,
-        ))
+        // .layer(middleware::from_fn_with_state(
+        //     mc.clone(),
+        //     web::mw_auth::mw_ctx_resolver,
+        // ))
         .layer(CookieManagerLayer::new())
         .fallback_service(serve_dir());
 

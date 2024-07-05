@@ -22,7 +22,7 @@ cargo watch -q -c -w tests/ -x "test -q quick_dev -- --nocapture"
 #### Start db
 
 ```bash
-docker run -d --rm --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=welcome postgres:15
+docker run -d --rm --name postgres -p 5434:5432 -e POSTGRES_PASSWORD=welcome postgres:15
 ```
 
 start pg terminal
@@ -40,4 +40,12 @@ docker build -f .\Dockerfile -t rustapi:1.0 .
 
 ```bash
 docker run -p 8080:8080 --name rust-api rustapi:1.0
+```
+
+## Unit test
+
+```bash
+cargo watch -q -c -x "test -- --nocapture"
+
+cargo watch -q -c -x "test {MOD_NAME} -- --nocapture"
 ```

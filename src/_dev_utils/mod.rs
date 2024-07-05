@@ -3,6 +3,7 @@ mod dev_db;
 use std::error::Error;
 use tokio::sync::OnceCell;
 use tracing::log::info;
+use crate::model::ModelManager;
 
 pub async fn init_dev() {
     static INIT: OnceCell<()> = OnceCell::const_new();
@@ -19,4 +20,17 @@ pub async fn init_dev() {
         }
     })
         .await;
+}
+
+pub async fn init_test() -> ModelManager {
+    static INIT: OnceCell<ModelManager> = OnceCell::const_new();
+
+    let mm = INIT
+        .get_or_init(|| async {
+            init_dev().await;
+            ModelManager::new().await.unwrap()
+        })
+        .await;
+
+    mm.clone()
 }

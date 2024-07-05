@@ -12,7 +12,7 @@ use tracing::log::debug;
 use crate::web::AUTH_TOKEN;
 use crate::{Error, Result};
 use crate::ctx::Ctx;
-use crate::model::ModelController;
+// use crate::model::ModelController;
 
 pub async fn mw_require_auth(
     ctx: Result<Ctx>,
@@ -26,7 +26,7 @@ pub async fn mw_require_auth(
 }
 
 pub async fn mw_ctx_resolver(
-    _mc: State<ModelController>,
+    // _mc: State<ModelController>,
     cookies: Cookies,
     mut request: Request<Body>,
     next: Next,

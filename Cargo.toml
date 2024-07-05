@@ -23,7 +23,8 @@ lazy-regex = "3.1.0"
 async-trait = "0.1.80"
 strum_macros = "0.26.4"
 uuid = {version = "1.8.0", features = ["v4", "fast-rng"]}
-sqlx = { version = "0.7", features = [ "macros", "runtime-tokio", "postgres", "uuid" ] }
+sqlx = { version = "0.7", features = [ "macros", "runtime-tokio-rustls", "postgres", "uuid", "time" ] }
+sqlb = "0.4"
 
 [dev-dependencies]
 anyhow = "1"

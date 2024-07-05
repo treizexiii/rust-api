@@ -4,6 +4,7 @@ use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 use strum_macros::AsRefStr;
 use tracing::debug;
+use crate::model;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -19,6 +20,10 @@ pub enum Error {
     AuthFailNoContext,
 
     TicketDeleteIdNotFound { id: u64 },
+
+    FailToCreatePool { msg: String },
+
+    ModelError()
 }
 
 impl IntoResponse for Error {
@@ -30,6 +35,12 @@ impl IntoResponse for Error {
         response.extensions_mut().insert(self);
 
         response
+    }
+}
+
+impl From<model::Error> for Error {
+    fn from(value: model::Error) -> Self {
+        Self::ModelError()
     }
 }
 

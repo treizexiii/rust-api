@@ -4,11 +4,12 @@ use std::time::Duration;
 use sqlx::{Pool, Postgres};
 use sqlx::postgres::PgPoolOptions;
 use tracing::log::info;
+use crate::Error;
 
 type Db = Pool<Postgres>;
 
-const PG_DEV_POSTGRES_URL: &str = "postgres://postgres:welcome@localhost/postgres";
-const PG_DEV_APP_URL: &str = "postgres://app_user:dev_only_pwd@localhost/app_db";
+const PG_DEV_POSTGRES_URL: &str = "postgres://postgres:welcome@localhost:5434/postgres";
+const PG_DEV_APP_URL: &str = "postgres://app_user:dev_only_pwd@localhost:5434/app_db";
 
 const SQL_RECREATE_DB: &str = "sql/dev_initial/00-recreate-db.sql";
 const SQL_DIR: &str = "sql/dev_initial";
@@ -56,8 +57,7 @@ async fn pexec(db: &Db, file: &str) -> Result<(), sqlx::Error> {
 
 async fn new_db_pool(db_con_url: &str) -> Result<Db, sqlx::Error> {
     PgPoolOptions::new()
-        // .max_connections(1)
-        // .acquire_timeout(Duration::from_millis(5000))
+        .max_connections(1)
         .connect(db_con_url)
         .await
 }
