@@ -56,6 +56,7 @@ impl Error {
             Error::AuthFailNoContext
             => { (StatusCode::FORBIDDEN, ClientError::NO_AUTH) }
 
+            Error::ModelError() |
             Error::TicketDeleteIdNotFound { .. }
             => { (StatusCode::BAD_REQUEST, ClientError::INVALID_PARAMS) }
 

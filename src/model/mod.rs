@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::ctx::Ctx;
 use crate::model::store::{Db, new_db_pool};
 
+mod unit_test;
 mod error;
 mod store;
 pub mod task;

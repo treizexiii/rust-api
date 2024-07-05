@@ -29,3 +29,4 @@ sqlb = "0.4"
 [dev-dependencies]
 anyhow = "1"
 httpc-test = "0.1.9"
+serial_test = "3"

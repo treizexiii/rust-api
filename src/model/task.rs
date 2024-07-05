@@ -1,15 +1,14 @@
 use crate::model::ModelManager;
 use crate::model::{Error, Result};
+use crate::ctx::Ctx;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use crate::ctx::Ctx;
 
 // region: -- Task Types
 
-#[derive(Clone, FromRow, Serialize)]
+#[derive(Debug, Clone, FromRow, Serialize)]
 pub struct Task {
     pub id: i64,
-    pub cid: u64,
     pub title: String,
 }
 
@@ -47,58 +46,44 @@ impl TaskController {
         Ok(id)
     }
 
-    // pub async fn get(
-    //     _ctx: &Ctx,
-    //     model_manager: &ModelManager,
-    //     id: i64
-    // ) -> Result<Task> {
-    //     let db = model_manager.db();
-    //
-    //     let task: Task = sqlx::query_as("SELECT * FROM task WHERE id = $1")
-    //         .bind(id)
-    //         .fetch_optional(db)
-    //         .await?
-    //         .ok_or(Error::EntityNotFound { entity: "task".to_string(), id})?;
-    //
-    //     Ok(task)
-    // }
-}
+    pub async fn get(
+        _ctx: &Ctx,
+        model_manager: &ModelManager,
+        id: i64
+    ) -> Result<Task> {
+        let db = model_manager.db();
 
-// endregion: -- TaskController
-
-// region: -- Tests
-#[cfg(test)]
-mod tests {
-    #![allow(unused)]
-    use super::*;
-    use anyhow::Result;
-    use crate::_dev_utils;
-
-    #[tokio::test]
-    pub async fn test_create_ok() -> Result<()> {
-        let mm = _dev_utils::init_test().await;
-        let ctx = Ctx::root_ctx();
-        let fx_title = "test_create_ok title";
-
-        let task_c = TaskForCreate {
-            title: fx_title.to_string()
-        };
-        let id = TaskController::create(&ctx, &mm, task_c).await?;
-
-        let (title,): (String,) =
-            sqlx::query_as("SELECT title FROM task WHERE id = $1")
-                .bind(id)
-                .fetch_one(mm.db())
-                .await?;
-        assert_eq!(title, fx_title);
-
-        let count = sqlx::query("DELETE FROM task WHERE id = $1")
+        let task: Task = sqlx::query_as("SELECT * FROM task WHERE id = $1")
             .bind(id)
-            .execute(mm.db())
+            .fetch_optional(db)
+            .await?
+            .ok_or(Error::EntityNotFound { entity: "task", id })?;
+
+        Ok(task)
+    }
+
+    pub async fn delete(
+        _ctx: &Ctx,
+        model_manager: &ModelManager,
+        id: i64
+    ) -> Result<()> {
+        let db = model_manager.db();
+
+        let count = sqlx::query(
+            "DELETE FROM task WHERE id = $1;"
+        )
+            .bind(id)
+            .execute(db)
             .await?
             .rows_affected();
 
+        if count == 0 {
+            return Err(Error::EntityNotFound { entity: "task", id});
+        }
+
         Ok(())
     }
+
 }
-// endregion: -- Tests
+
+// endregion: -- TaskController
