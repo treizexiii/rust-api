@@ -5,20 +5,21 @@ use crate::model::store::{Db, new_db_pool};
 
 mod unit_test;
 mod error;
+mod base;
 mod store;
 pub mod task;
 
 pub use self::error::{Error, Result};
 
 #[derive(Clone)]
-pub struct ModelManager {
+pub struct DbContext {
     db: Db,
 }
 
-impl ModelManager {
+impl DbContext {
     pub async fn new() -> Result<Self> {
         let db = new_db_pool().await?;
-        Ok(ModelManager { db })
+        Ok(DbContext { db })
     }
 
     pub(in crate::model) fn db(&self) -> &Db {

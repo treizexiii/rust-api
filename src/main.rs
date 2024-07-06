@@ -27,7 +27,7 @@ use tracing_subscriber::EnvFilter;
 use uuid::Uuid;
 use crate::ctx::Ctx;
 use crate::log::log_request;
-use crate::model::{ModelManager};
+use crate::model::{DbContext};
 use crate::web::routes_static::{route_hello, serve_dir};
 
 #[tokio::main]
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     _dev_utils::init_dev().await;
 
     // Initialize managers
-    let mm = ModelManager::new().await?;
+    let mm = DbContext::new().await?;
 
     // Initialize controllers
     // let mc = ModelController::new().await?;

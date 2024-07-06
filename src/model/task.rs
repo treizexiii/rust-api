@@ -1,23 +1,27 @@
-use crate::model::ModelManager;
+use crate::model::{base, DbContext};
 use crate::model::{Error, Result};
 use crate::ctx::Ctx;
 use serde::{Deserialize, Serialize};
+use sqlb::Fields;
 use sqlx::FromRow;
-
+use crate::model::base::Repository;
 // region: -- Task Types
 
-#[derive(Debug, Clone, FromRow, Serialize)]
+#[derive(Debug, Clone, Fields, FromRow, Serialize)]
 pub struct Task {
     pub id: i64,
     pub title: String,
+
+    // #[field(skip)]
+    // pub desc: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Fields, Deserialize)]
 pub struct TaskForCreate {
     pub title: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Fields, Deserialize)]
 pub struct TaskForUpdate {
     pub title: Option<String>,
 }
@@ -26,64 +30,43 @@ pub struct TaskForUpdate {
 
 // region: -- TaskController
 
-pub struct TaskController {}
+pub struct TaskRepository {}
 
-impl TaskController {
+impl Repository for TaskRepository {
+    const TABLE: &'static str = "task";
+}
+
+impl TaskRepository {
     pub async fn create(
-        _ctx: &Ctx,
-        model_manager: &ModelManager,
+        ctx: &Ctx,
+        db_context: &DbContext,
         task_c: TaskForCreate,
     ) -> Result<i64> {
-        let db = model_manager.db();
+        base::create::<Self, _>(ctx, db_context, task_c).await
+    }
 
-        let (id, ) = sqlx::query_as::<_, (i64,)>(
-            "INSERT INTO task (title) values ($1) returning id;"
-        )
-            .bind(task_c.title)
-            .fetch_one(db)
-            .await?;
-
-        Ok(id)
+    pub async fn list(
+        ctx: &Ctx,
+        db_context: &DbContext,
+    ) -> Result<Vec<Task>> {
+        base::list::<Self, _>(ctx, db_context).await
     }
 
     pub async fn get(
-        _ctx: &Ctx,
-        model_manager: &ModelManager,
-        id: i64
+        ctx: &Ctx,
+        db_context: &DbContext,
+        id: i64,
     ) -> Result<Task> {
-        let db = model_manager.db();
-
-        let task: Task = sqlx::query_as("SELECT * FROM task WHERE id = $1")
-            .bind(id)
-            .fetch_optional(db)
-            .await?
-            .ok_or(Error::EntityNotFound { entity: "task", id })?;
-
-        Ok(task)
+        base::get::<Self, _>(ctx, db_context, id).await
     }
 
     pub async fn delete(
-        _ctx: &Ctx,
-        model_manager: &ModelManager,
-        id: i64
+        ctx: &Ctx,
+        db_context: &DbContext,
+        id: i64,
     ) -> Result<()> {
-        let db = model_manager.db();
-
-        let count = sqlx::query(
-            "DELETE FROM task WHERE id = $1;"
-        )
-            .bind(id)
-            .execute(db)
-            .await?
-            .rows_affected();
-
-        if count == 0 {
-            return Err(Error::EntityNotFound { entity: "task", id});
-        }
-
-        Ok(())
+        base::delete::<Self, Task>(ctx, db_context, id).await
     }
-
 }
 
 // endregion: -- TaskController
