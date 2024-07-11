@@ -57,7 +57,7 @@ async fn pexec(db: &Db, file: &str) -> Result<(), sqlx::Error> {
 
 async fn new_db_pool(db_con_url: &str) -> Result<Db, sqlx::Error> {
     PgPoolOptions::new()
-        .max_connections(1)
+        .max_connections(5)
         .connect(db_con_url)
         .await
 }

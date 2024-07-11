@@ -2,7 +2,7 @@
 
 ## Development
 
-#### Server side:
+### Server side
 
 ```bash
 cargo install cargo-watch
@@ -13,13 +13,13 @@ cargo install --locked cargo-watch # on windows
 cargo watch -q -c -w src/ -w .cargo/ -x run
 ```
 
-#### Client side:
+### Client side
 
 ```bash
 cargo watch -q -c -w tests/ -x "test -q quick_dev -- --nocapture"
 ```
 
-#### Start db
+### Start db
 
 ```bash
 docker run -d --rm --name postgres -p 5434:5432 -e POSTGRES_PASSWORD=welcome postgres:15
@@ -33,7 +33,8 @@ docker exec -it -u postgres postgres psql
 
 ## Build
 
-### Docker:
+### Docker
+
 ```bash
 docker build -f .\Dockerfile -t rustapi:1.0 . 
 ```

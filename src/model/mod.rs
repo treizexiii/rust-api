@@ -8,6 +8,7 @@ mod error;
 mod base;
 mod store;
 pub mod task;
+pub mod user;
 
 pub use self::error::{Error, Result};
 
