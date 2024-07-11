@@ -6,6 +6,7 @@ mod log;
 mod model;
 mod web;
 mod ctx;
+mod crypt;
 
 pub mod _dev_utils;
 
