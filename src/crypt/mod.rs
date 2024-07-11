@@ -1,4 +1,5 @@
 mod error;
+pub mod pwd;
 
 pub use self::error::{ Error, Result };
 
@@ -34,6 +35,7 @@ mod test {
 
     fn test_encrypt_into_b64u_ok() -> Result<()> {
         let mut fx_key = [0u8; 64];
+        rand::thread_rng().fill_bytes(&mut fx_key);
         let fx_enc_content = EncryptContent {
             content: "test_encrypt_into_b64u_ok content".to_string(),
             salt: "test_encrypt_into_b64u_ok salt".to_string(),

@@ -12,6 +12,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[serde(tag = "type", content = "data")]
 pub enum Error {
     ConfigMissingEnv(&'static str),
+    ConfigInvalidFormat(&'static str),
 
     LoginFail,
 
@@ -23,7 +24,7 @@ pub enum Error {
 
     FailToCreatePool { msg: String },
 
-    ModelError()
+    ModelError(),
 }
 
 impl IntoResponse for Error {

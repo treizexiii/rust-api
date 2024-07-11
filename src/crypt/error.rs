@@ -6,6 +6,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Debug, Clone, Serialize)]
 pub enum Error {
     KeyFailHmac,
+    PwdInvalid,
 }
 
 impl core::fmt::Display for Error {
