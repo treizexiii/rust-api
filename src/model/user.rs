@@ -1,9 +1,12 @@
+use std::vec;
+
+use crate::crypt::{pwd, EncryptContent};
 use crate::ctx::Ctx;
-use crate::model::base::{ self, Repository };
-use crate::model::{ Error, Result };
+use crate::model::base::{self, Repository};
 use crate::model::DbContext;
-use serde::{ Deserialize, Serialize };
-use sqlb::{ Field, Fields, HasFields };
+use crate::model::{Error, Result};
+use serde::{Deserialize, Serialize};
+use sqlb::{Field, Fields, HasFields};
 use sqlx::postgres::PgRow;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -56,33 +59,62 @@ impl Repository for UserRepository {
 }
 
 impl UserRepository {
-    pub async fn get<E>(ctx: &Ctx, db_context: &DbContext, id: i64) -> Result<E> where E: UserBy {
+    pub async fn get<E>(ctx: &Ctx, db_context: &DbContext, id: i64) -> Result<E>
+    where
+        E: UserBy,
+    {
         base::get::<Self, E>(ctx, db_context, id).await
     }
 
     pub async fn first_by_username<E>(
         ctx: &Ctx,
         db_context: &DbContext,
-        username: &str
+        username: &str,
     ) -> Result<Option<E>>
-        where E: UserBy
+    where
+        E: UserBy,
     {
         let db = db_context.db();
 
-        let user = sqlb
-            ::select()
+        let user = sqlb::select()
             .table(Self::TABLE)
             .and_where_eq("username", username)
-            .fetch_optional::<_, E>(db).await?;
+            .fetch_optional::<_, E>(db)
+            .await?;
 
         Ok(user)
+    }
+
+    pub async fn update_pwd(
+        ctx: &Ctx,
+        db_context: &DbContext,
+        id: i64,
+        pwd_clear: &str,
+    ) -> Result<()> {
+        let db = db_context.db();
+
+        let user: UserForLogin = Self::get(ctx, db_context, id).await?;
+
+        let pwd = pwd::encrypt_pwd(&EncryptContent {
+            content: pwd_clear.to_string(),
+            salt: user.pwd_salt.to_string(),
+        })?;
+
+        sqlb::update()
+            .table(Self::TABLE)
+            .and_where_eq("id", id)
+            .data(vec![("pwd", pwd.to_string()).into()])
+            .exec(db)
+            .await?;
+
+        Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::{ Context, Ok, Result };
+    use anyhow::{Context, Ok, Result};
 
     #[tokio::test]
     async fn test_first_ok_demo1() -> Result<()> {
@@ -90,11 +122,9 @@ mod tests {
         let ctx = Ctx::root_ctx();
         let fx_username = "demo1";
 
-        let user: User = UserRepository::first_by_username(
-            &ctx,
-            &db_context,
-            fx_username
-        ).await?.context("Should have user 'demo1'")?;
+        let user: User = UserRepository::first_by_username(&ctx, &db_context, fx_username)
+            .await?
+            .context("Should have user 'demo1'")?;
 
         assert_eq!(user.username, fx_username);
 

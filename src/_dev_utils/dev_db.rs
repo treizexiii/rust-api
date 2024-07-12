@@ -1,10 +1,13 @@
+use crate::ctx::Ctx;
+use crate::model::user::{User, UserRepository};
+use crate::model::DbContext;
+use crate::Error;
+use sqlx::postgres::PgPoolOptions;
+use sqlx::{Pool, Postgres};
 use std::fs;
 use std::path::PathBuf;
 use std::time::Duration;
-use sqlx::{Pool, Postgres};
-use sqlx::postgres::PgPoolOptions;
 use tracing::log::info;
-use crate::Error;
 
 type Db = Pool<Postgres>;
 
@@ -13,6 +16,8 @@ const PG_DEV_APP_URL: &str = "postgres://app_user:dev_only_pwd@localhost:5434/ap
 
 const SQL_RECREATE_DB: &str = "sql/dev_initial/00-recreate-db.sql";
 const SQL_DIR: &str = "sql/dev_initial";
+
+const DEMO_PWD: &str = "welcome";
 
 pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
     info!("{:<12} - init_dev_db", "FOR-DEV-ONLY");
@@ -37,6 +42,17 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
+
+    let db = DbContext::new().await?;
+    let ctx = Ctx::root_ctx();
+
+    let demo1_user: User = UserRepository::first_by_username(&ctx, &db, "demo1")
+        .await?
+        .unwrap();
+
+    UserRepository::update_pwd(&ctx, &db, demo1_user.id, DEMO_PWD).await?;
+
+    info!("{:<12} - init-dev-db - set demo1 pwd", "FOR-DEV-ONLY");
 
     Ok(())
 }

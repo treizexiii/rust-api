@@ -1,9 +1,9 @@
 mod error;
 pub mod pwd;
 
-pub use self::error::{ Error, Result };
+pub use self::error::{Error, Result};
 
-use hmac::{ Hmac, Mac };
+use hmac::{Hmac, Mac};
 use sha2::Sha512;
 
 pub struct EncryptContent {
@@ -40,7 +40,7 @@ mod test {
             content: "test_encrypt_into_b64u_ok content".to_string(),
             salt: "test_encrypt_into_b64u_ok salt".to_string(),
         };
-        
+
         let fx_res = encrypt_into_b64u(&fx_key, &fx_enc_content)?;
 
         let res = encrypt_into_b64u(&fx_key, &fx_enc_content)?;

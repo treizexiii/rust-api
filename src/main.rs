@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     _dev_utils::init_dev().await;
 
     // Initialize managers
-    let mm = DbContext::new().await?;
+    let db = DbContext::new().await?;
 
     // Initialize controllers
     // let mc = ModelController::new().await?;
@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
     // register routes
     let routes_all = Router::new()
         .merge(route_hello())
-        .merge(web::routes_login::routes())
+        .merge(web::routes_login::routes(db.clone()))
         // .nest("/api", routes_api)
         .layer(middleware::map_response(main_response_mapper))
         // .layer(middleware::from_fn_with_state(

@@ -1,10 +1,10 @@
-use std::fmt::Formatter;
+use crate::model;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
+use std::fmt::Formatter;
 use strum_macros::AsRefStr;
 use tracing::debug;
-use crate::model;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -15,6 +15,9 @@ pub enum Error {
     ConfigInvalidFormat(&'static str),
 
     LoginFail,
+    LoginFailUserNotFound,
+    LoginFailUserNotValidated { user_id: i64 },
+    LoginFailPasswordNotMatching { user_id: i64 },
 
     AuthFailNoAuthToken,
     AuthFailTokenWrongFormat,
@@ -45,24 +48,31 @@ impl From<model::Error> for Error {
     }
 }
 
-impl Error {
+impl Error {²
     pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
         #[allow(unreachable_patterns)]
         match self {
             Error::LoginFail
-            => { (StatusCode::FORBIDDEN, ClientError::LOGIN_FAIL) }
+            | Error::LoginFailUserNotFound
+            | Error::LoginFailUserNotValidated { .. }
+            | Error::LoginFailPasswordNotMatching { .. } => {
+                (StatusCode::FORBIDDEN, ClientError::LOGIN_FAIL)
+            }
 
-            Error::AuthFailNoAuthToken |
-            Error::AuthFailTokenWrongFormat |
-            Error::AuthFailNoContext
-            => { (StatusCode::FORBIDDEN, ClientError::NO_AUTH) }
+            Error::AuthFailNoAuthToken
+            | Error::AuthFailTokenWrongFormat
+            | Error::AuthFailNoContext => {
+                (StatusCode::FORBIDDEN, ClientError::NO_AUTH)
+            },
 
-            Error::ModelError() |
-            Error::TicketDeleteIdNotFound { .. }
-            => { (StatusCode::BAD_REQUEST, ClientError::INVALID_PARAMS) }
+            Error::ModelError() | Error::TicketDeleteIdNotFound { .. } => {
+                (StatusCode::BAD_REQUEST, ClientError::INVALID_PARAMS)
+            }
 
-            _
-            => { (StatusCode::INTERNAL_SERVER_ERROR, ClientError::SERVICE_ERROR) }
+            _ => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ClientError::SERVICE_ERROR,
+            ),
         }
     }
 }
