@@ -7,12 +7,13 @@ use axum::RequestPartsExt;
 use axum::response::Response;
 use lazy_regex::regex_captures;
 use tower_cookies::{Cookie, Cookies};
+use tracing::info;
 use tracing::log::debug;
 
+use crate::model::ticket::TicketRepository;
 use crate::web::AUTH_TOKEN;
-use crate::{Error, Result};
 use crate::ctx::Ctx;
-// use crate::model::ModelController;
+use crate::{Error, Result};
 
 pub async fn mw_require_auth(
     ctx: Result<Ctx>,
@@ -26,7 +27,7 @@ pub async fn mw_require_auth(
 }
 
 pub async fn mw_ctx_resolver(
-    // _mc: State<ModelController>,
+    _mc: State<TicketRepository>,
     cookies: Cookies,
     mut request: Request<Body>,
     next: Next,
@@ -34,11 +35,11 @@ pub async fn mw_ctx_resolver(
     debug!("{:<12} - mw_ctx_resolver", "MIDDLEWARE");
 
     let auth_token = cookies.get(AUTH_TOKEN).map(|c| c.value().to_string());
-
     let result_ctx = match auth_token
         .ok_or(Error::AuthFailNoAuthToken)
         .and_then(parse_token) {
         Ok((user_id, _exp, _sign)) => {
+            info!("user_id:{:<12}",user_id);
             Ok(Ctx::new(user_id))
         }
         Err(e) => Err(e),

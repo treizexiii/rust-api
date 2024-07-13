@@ -2,12 +2,14 @@
 
 ## Development
 
-### Server side
+### Tools
 
 ```bash
 cargo install cargo-watch
 cargo install --locked cargo-watch # on windows
 ```
+
+### Server side
 
 ```bash
 cargo watch -q -c -w src/ -w .cargo/ -x run

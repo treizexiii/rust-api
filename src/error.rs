@@ -48,7 +48,7 @@ impl From<model::Error> for Error {
     }
 }
 
-impl Error {²
+impl Error {
     pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
         #[allow(unreachable_patterns)]
         match self {
