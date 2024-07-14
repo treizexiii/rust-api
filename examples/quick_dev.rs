@@ -5,8 +5,6 @@ use serde_json::json;
 async fn main() -> Result<()> {
     let client = httpc_test::new_client("http://localhost:8080")?;
 
-    client.do_get("/hello").await?.print().await?;
-
     let req_login = client.do_post(
         "/api/login",
         json!({
@@ -15,6 +13,16 @@ async fn main() -> Result<()> {
         })
     );
     req_login.await?.print().await?;
+
+    client.do_get("/hello").await?.print().await?;
+
+    let req_logout = client.do_post(
+        "/api/logout",
+        json!({
+            "logout": true,
+        })
+    );
+    req_logout.await?.print().await?;
 
     client.do_get("/hello").await?.print().await?;
 

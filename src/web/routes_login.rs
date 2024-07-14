@@ -18,14 +18,21 @@ use super::{Error, Result};
 pub fn routes(db_context: DbContext) -> Router {
     Router::new()
         .route("/api/login", post(api_login))
+        .route("/api/logout", post(api_logout))
         .with_state(db_context)
+}
+
+#[derive(Debug, Deserialize)]
+struct LoginPayload {
+    username: String,
+    password: String,
 }
 
 async fn api_login(
     State(db_context): State<DbContext>,
     cookies: Cookies,
-    Json(payload): Json<LoginPayload>,
-) -> Result<Json<Value>> {
+    Json(payload): Json<LoginPayload>) -> Result<Json<Value>>
+{
     debug!("{:<12} - api_login", "HANDLER");
 
     let LoginPayload {
@@ -63,7 +70,23 @@ async fn api_login(
 }
 
 #[derive(Debug, Deserialize)]
-struct LoginPayload {
-    username: String,
-    password: String,
+struct LogoutPayload {
+    logout: bool,
+}
+
+async fn api_logout(cookies: Cookies, Json(payload): Json<LogoutPayload>) -> Result<Json<Value>> {
+    debug!("{:<12} - api_logout", "HANDLER");
+    let should_logoff = payload.logout;
+
+    if should_logoff {
+        web::remove_token_cookie(&cookies);
+    }
+
+    let body = Json(json!({
+        "result": {
+            "succes": true
+        }
+    }));
+
+    Ok(body)
 }
