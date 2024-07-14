@@ -25,9 +25,15 @@ pub enum Error {
 
     CtxExt(CtxExtractorError),
 
+    RpcMethodUnknown(String),
+    RpcMissingParams { rpc_method: String },
+    RpcFailJsonParams { rpc_method: String },
+
     ModelError(),
     Model(model::Error),
     Crypt(crypt::Error),
+
+    SerdeJson(String),
 }
 
 impl IntoResponse for Error {
@@ -65,7 +71,11 @@ impl Error {
 
             CtxExt(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
-            ModelError() | TicketDeleteIdNotFound { .. } => {
+            Model(model::Error::EntityNotFound { entity, id }) => {
+                (StatusCode::NOT_FOUND, ClientError::ENTITY_NOT_FOUND { entity, id: *id })
+            }
+
+            TicketDeleteIdNotFound { .. } => {
                 (StatusCode::BAD_REQUEST, ClientError::INVALID_PARAMS)
             }
 
@@ -95,9 +105,15 @@ impl From<crypt::Error> for Error {
     }
 }
 
+impl From<serde_json::Error> for Error {
+    fn from(value: serde_json::Error) -> Self {
+        Self::SerdeJson(value.to_string())
+    }
+}
+
 impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter)
-        -> core::result::Result<(), core::fmt::Error> {
+           -> core::result::Result<(), core::fmt::Error> {
         write!(f, "{:?}", self)
     }
 }
@@ -107,10 +123,12 @@ impl std::error::Error for Error {}
 // --- CLIENT ERROR
 
 #[allow(non_camel_case_types)]
-#[derive(Debug, strum_macros::AsRefStr)]
+#[derive(Debug, Serialize, strum_macros::AsRefStr)]
+#[serde(tag = "message", content = "detail")]
 pub enum ClientError {
     LOGIN_FAIL,
     NO_AUTH,
     INVALID_PARAMS,
     SERVICE_ERROR,
+    ENTITY_NOT_FOUND { entity: &'static str, id: i64 },
 }

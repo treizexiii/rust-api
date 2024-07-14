@@ -39,6 +39,7 @@ use uuid::Uuid;
 use crate::web::middlewares::response_mapper;
 use crate::web::middlewares::auth::{mw_ctx_resolver, mw_require_auth};
 use crate::web::middlewares::response_mapper::mw_response_mapper;
+use crate::web::rpc;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -54,14 +55,13 @@ async fn main() -> Result<()> {
     // Initialize managers
     let db = DbContext::new().await?;
 
-    let routes_hello = Router::new()
-        .route("/hello", get(|| async { Html("hello world!") }))
+    let routes_rpc = rpc::routes(db.clone())
         .route_layer(middleware::from_fn(mw_require_auth));
 
     // register routes
     let routes_all = Router::new()
         .merge(web::routes_login::routes(db.clone()))
-        .merge(routes_hello)
+        .nest("/api", routes_rpc)
         .layer(middleware::map_response(mw_response_mapper))
         .layer(middleware::from_fn_with_state(db.clone(), mw_ctx_resolver))
         .layer(CookieManagerLayer::new())

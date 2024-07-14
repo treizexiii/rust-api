@@ -3014,6 +3014,7 @@ dependencies = [
  "hmac",
  "httpc-test",
  "lazy-regex",
+ "log",
  "rand",
  "serde",
  "serde_json",

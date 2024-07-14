@@ -60,6 +60,15 @@ impl TaskRepository {
         base::get::<Self, _>(ctx, db_context, id).await
     }
 
+    pub async fn update(
+        ctx: &Ctx,
+        db_context: &DbContext,
+        id: i64,
+        task_u: TaskForUpdate,
+    ) -> Result<()> {
+        base::update::<Self, _>(ctx, db_context, id, task_u).await
+    }
+
     pub async fn delete(
         ctx: &Ctx,
         db_context: &DbContext,
