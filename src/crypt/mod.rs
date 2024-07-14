@@ -1,5 +1,7 @@
 mod error;
+
 pub mod pwd;
+pub mod token;
 
 pub use self::error::{Error, Result};
 
@@ -33,6 +35,7 @@ mod test {
     use anyhow::{Ok, Result};
     use rand::RngCore;
 
+    #[test]
     fn test_encrypt_into_b64u_ok() -> Result<()> {
         let mut fx_key = [0u8; 64];
         rand::thread_rng().fill_bytes(&mut fx_key);

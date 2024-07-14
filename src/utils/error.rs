@@ -1,11 +1,14 @@
-use std::fmt::Formatter;
 use serde::Serialize;
+use serde_with::serde_as;
+use std::fmt::Formatter;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Debug, Clone, Serialize)]
+#[serde_as]
+#[derive(Debug, Serialize)]
 pub enum Error {
-    FailToCreatePool(String),
+    DateFailParse(String),
+    FailToB64uDecode,
 }
 
 impl core::fmt::Display for Error {
@@ -14,6 +17,4 @@ impl core::fmt::Display for Error {
     }
 }
 
-impl std::error::Error for Error {
-
-}
+impl std::error::Error for Error {}

@@ -1,89 +1,31 @@
-use crate::model;
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
-use serde::Serialize;
 use std::fmt::Formatter;
-use strum_macros::AsRefStr;
-use tracing::debug;
+use crate::model;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Debug, Clone, Serialize, AsRefStr)]
-#[serde(tag = "type", content = "data")]
+#[derive(Debug)]
 pub enum Error {
     ConfigMissingEnv(&'static str),
     ConfigInvalidFormat(&'static str),
 
-    LoginFail,
-    LoginFailUserNotFound,
-    LoginFailUserNotValidated { user_id: i64 },
-    LoginFailPasswordNotMatching { user_id: i64 },
-
-    AuthFailNoAuthToken,
-    AuthFailTokenWrongFormat,
-    AuthFailNoContext,
-
-    TicketDeleteIdNotFound { id: u64 },
+    Model(model::Error),
 
     FailToCreatePool { msg: String },
-
-    ModelError(),
-}
-
-impl IntoResponse for Error {
-    fn into_response(self) -> Response {
-        debug!("{:<12} - {self:?}", "INTO_RES");
-
-        let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
-
-        response.extensions_mut().insert(self);
-
-        response
-    }
 }
 
 impl From<model::Error> for Error {
-    fn from(value: model::Error) -> Self {
-        Self::ModelError()
+    fn from(val: model::Error) -> Self {
+        Self::Model(val)
     }
 }
 
-impl Error {
-    pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
-        #[allow(unreachable_patterns)]
-        match self {
-            Error::LoginFail
-            | Error::LoginFailUserNotFound
-            | Error::LoginFailUserNotValidated { .. }
-            | Error::LoginFailPasswordNotMatching { .. } => {
-                (StatusCode::FORBIDDEN, ClientError::LOGIN_FAIL)
-            }
-
-            Error::AuthFailNoAuthToken
-            | Error::AuthFailTokenWrongFormat
-            | Error::AuthFailNoContext => {
-                (StatusCode::FORBIDDEN, ClientError::NO_AUTH)
-            },
-
-            Error::ModelError() | Error::TicketDeleteIdNotFound { .. } => {
-                (StatusCode::BAD_REQUEST, ClientError::INVALID_PARAMS)
-            }
-
-            _ => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                ClientError::SERVICE_ERROR,
-            ),
-        }
+impl core::fmt::Display for Error {
+    fn fmt(
+        &self,
+        fmt: &mut Formatter,
+    ) -> core::result::Result<(), core::fmt::Error> {
+        write!(fmt, "{self:?}")
     }
 }
 
-// --- CLIENT ERROR
-
-#[allow(non_camel_case_types)]
-#[derive(Debug, Clone, AsRefStr)]
-pub enum ClientError {
-    LOGIN_FAIL,
-    NO_AUTH,
-    INVALID_PARAMS,
-    SERVICE_ERROR,
-}
+impl std::error::Error for Error {}

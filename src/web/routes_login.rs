@@ -10,8 +10,10 @@ use crate::crypt::{pwd, EncryptContent};
 use crate::ctx::Ctx;
 use crate::model::user::{UserForLogin, UserRepository};
 use crate::model::DbContext;
+use crate::web;
 use crate::web::AUTH_TOKEN;
-use crate::{Error, Result};
+
+use super::{Error, Result};
 
 pub fn routes(db_context: DbContext) -> Router {
     Router::new()
@@ -36,21 +38,20 @@ async fn api_login(
     let user: UserForLogin = UserRepository::first_by_username(&root_ctx, &db_context, &username)
         .await?
         .ok_or(Error::LoginFailUserNotFound)?;
-
+    let user_id = user.id;
     let Some(pwd) = user.pwd else {
-        return Err(Error::LoginFailUserNotValidated { user_id: user.id });
+        return Err(Error::LoginFailUserHasNoPassword)
     };
 
-    let validate = pwd::validate_pwd(
+    pwd::validate_pwd(
         &EncryptContent {
-            content: pwd_clear,
             salt: user.pwd_salt.to_string(),
+            content: pwd_clear.clone(),
         },
         &pwd,
-    )
-    .map_err(|_| Error::LoginFailPasswordNotMatching { user_id: user.id });
+    ).map_err(|_| Error::LoginFailPasswordNotMatching { user_id });
 
-    cookies.add(Cookie::new(AUTH_TOKEN, "user-1.exp.sign"));
+    web::set_token_cookie(&cookies, &user.username, &user.token_salt.to_string())?;
 
     let body = Json(json!({
         "result": {

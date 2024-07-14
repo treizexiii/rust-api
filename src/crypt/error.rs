@@ -1,5 +1,6 @@
 use std::fmt::Formatter;
 use serde::Serialize;
+use crate::{crypt, model};
 
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -7,6 +8,12 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     KeyFailHmac,
     PwdInvalid,
+    TokenInvalidFormat,
+    TokenCannotDecodeIdentifier,
+    TokenCannotDecodeExpiration,
+    TokenSignatureNotMatching,
+    TokenExpirationNotIdo,
+    TokenExpired
 }
 
 impl core::fmt::Display for Error {

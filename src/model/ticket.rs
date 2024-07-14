@@ -9,7 +9,7 @@ use crate::model::{Error, Result};
 #[derive(Clone, Debug, Serialize)]
 pub struct Ticket {
     pub id: u64,
-    pub cid: u64,
+    pub cid: i64,
     pub title: String,
 }
 

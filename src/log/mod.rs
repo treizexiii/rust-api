@@ -5,9 +5,9 @@ use serde_with::serde_derive::Serialize;
 use serde_with::skip_serializing_none;
 use tracing::log::debug;
 use uuid::Uuid;
-use crate::{Error, Result};
 use crate::ctx::Ctx;
-use crate::error::ClientError;
+use crate::Result;
+use crate::web::{self, ClientError};
 
 #[skip_serializing_none]
 #[derive(Serialize)]
@@ -15,7 +15,7 @@ struct RequestLogLine {
     uuid: String,
     timestamp: String, // ISO8601
 
-    user_id: Option<u64>,
+    user_id: Option<i64>,
 
     req_path: String,
     req_method: String,
@@ -30,7 +30,7 @@ pub async fn log_request(
     method: Method,
     uri: Uri,
     ctx: Option<Ctx>,
-    service_error: Option<&Error>,
+    service_error: Option<&web::Error>,
     client_error: Option<ClientError>,
 ) -> Result<()> {
     let timestamp = SystemTime::now()
