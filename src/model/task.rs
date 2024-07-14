@@ -1,5 +1,5 @@
 use crate::model::{base, DbContext};
-use crate::model::{Error, Result};
+use crate::model::{Result};
 use crate::ctx::Ctx;
 use serde::{Deserialize, Serialize};
 use sqlb::Fields;

@@ -1,4 +1,4 @@
-use crate::crypt::token::{validate_web_token, Token};
+use crate::token::{validate_web_token, Token};
 use crate::ctx::Ctx;
 use crate::model::user::{UserRepository, UserForAuth};
 use crate::model::DbContext;
@@ -68,10 +68,10 @@ async fn _ctx_resolve(
         .map_err(|ex| CtxExtractorError::DbContextAccessError(ex.to_string()))?
         .ok_or(CtxExtractorError::UserNotFound)?;
 
-    validate_web_token(&token, &user.token_salt.to_string())
+    validate_web_token(&token, user.token_salt)
         .map_err(|_| CtxExtractorError::FailValidateToken)?;
 
-    set_token_cookie(cookies, &user.username, &user.token_salt.to_string())
+    set_token_cookie(cookies, &user.username, user.token_salt)
         .map_err(|_| CtxExtractorError::CannotSetTokenCookie);
 
     Ctx::new(user.id).map_err(|ex| CtxExtractorError::CtxCreateFail(ex.to_string()))

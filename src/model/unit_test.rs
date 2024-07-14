@@ -97,7 +97,7 @@ mod tests {
 
         let tasks = TaskRepository::list(&ctx, &mm).await?;
 
-        let task:  Vec<Task> = tasks
+        let task: Vec<Task> = tasks
             .clone()
             .into_iter()
             .filter(|t| t.title.starts_with("test_list_ok-task"))

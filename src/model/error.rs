@@ -1,4 +1,5 @@
-use crate::{crypt, model::store};
+use crate::{model::store};
+use crate::pwd;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use std::fmt::Formatter;
@@ -8,7 +9,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[serde_as]
 #[derive(Debug, Serialize)]
 pub enum Error {
-    Crypt(crypt::Error),
+    Pwd(pwd::Error),
     Store(store::Error),
 
     EntityNotFound { entity: &'static str, id: i64 },
@@ -16,9 +17,9 @@ pub enum Error {
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
 }
 
-impl From<crypt::Error> for Error {
-    fn from(value: crypt::Error) -> Self {
-        Self::Crypt(value)
+impl From<pwd::Error> for Error {
+    fn from(value: pwd::Error) -> Self {
+        Self::Pwd(value)
     }
 }
 

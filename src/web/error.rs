@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use crate::{crypt, model, web};
+use crate::{model, web, pwd, token};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
@@ -31,7 +31,8 @@ pub enum Error {
 
     ModelError(),
     Model(model::Error),
-    Crypt(crypt::Error),
+    Pwd(pwd::Error),
+    Token(token::Error),
 
     SerdeJson(String),
 }
@@ -99,9 +100,15 @@ impl From<model::Error> for Error {
     }
 }
 
-impl From<crypt::Error> for Error {
-    fn from(value: crypt::Error) -> Self {
-        Self::Crypt(value)
+impl From<token::Error> for Error {
+    fn from(value: token::Error) -> Self {
+        Self::Token(value)
+    }
+}
+
+impl From<pwd::Error> for Error {
+    fn from(value: pwd::Error) -> Self {
+        Self::Pwd(value)
     }
 }
 

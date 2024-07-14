@@ -6,7 +6,7 @@ use serde_json::{json, Value};
 use tower_cookies::{Cookie, Cookies};
 use tracing::log::debug;
 
-use crate::crypt::{pwd, EncryptContent};
+use crate::pwd::{self, ContentToHash};
 use crate::ctx::Ctx;
 use crate::model::user::{UserForLogin, UserRepository};
 use crate::model::DbContext;
@@ -51,14 +51,14 @@ async fn api_login(
     };
 
     pwd::validate_pwd(
-        &EncryptContent {
-            salt: user.pwd_salt.to_string(),
+        &ContentToHash {
+            salt: user.pwd_salt,
             content: pwd_clear.clone(),
         },
         &pwd,
     ).map_err(|_| Error::LoginFailPasswordNotMatching { user_id });
 
-    web::set_token_cookie(&cookies, &user.username, &user.token_salt.to_string())?;
+    web::set_token_cookie(&cookies, &user.username, user.token_salt)?;
 
     let body = Json(json!({
         "result": {

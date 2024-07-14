@@ -1,10 +1,10 @@
 use std::vec;
 
-use crate::crypt::{pwd, EncryptContent};
 use crate::ctx::Ctx;
 use crate::model::base::{self, Repository};
 use crate::model::DbContext;
-use crate::model::{Error, Result};
+use crate::model::Result;
+use crate::pwd::{self, ContentToHash};
 use serde::{Deserialize, Serialize};
 use sqlb::{Field, Fields, HasFields};
 use sqlx::postgres::PgRow;
@@ -95,9 +95,9 @@ impl UserRepository {
 
         let user: UserForLogin = Self::get(ctx, db_context, id).await?;
 
-        let pwd = pwd::encrypt_pwd(&EncryptContent {
+        let pwd = pwd::hash_pwd(&ContentToHash {
             content: pwd_clear.to_string(),
-            salt: user.pwd_salt.to_string(),
+            salt: user.pwd_salt,
         })?;
 
         sqlb::update()
