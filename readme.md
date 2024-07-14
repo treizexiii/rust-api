@@ -18,7 +18,7 @@ cargo watch -q -c -w src/ -w .cargo/ -x run
 ### Client side
 
 ```bash
-cargo watch -q -c -w tests/ -x "test -q quick_dev -- --nocapture"
+cargo watch -q -c -w examples/ -x "test -q quick_dev -- --nocapture"
 ```
 
 ### Start db

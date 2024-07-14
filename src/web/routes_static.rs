@@ -25,12 +25,6 @@ pub fn serve_dir() -> MethodRouter {
     )
 }
 
-pub fn route_hello() -> Router {
-    Router::new()
-        .route("/hello", get(handler_hello))
-        .route("/hello2/:name", get(handler_hello2))
-}
-
 #[derive(Debug, Deserialize)]
 struct HelloParams {
     name: Option<String>,

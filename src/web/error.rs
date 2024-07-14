@@ -4,6 +4,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 use tracing::debug;
+use crate::web::middlewares::auth::CtxExtractorError;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -22,7 +23,7 @@ pub enum Error {
 
     TicketDeleteIdNotFound { id: u64 },
 
-    CtxExt(web::mw_auth::CtxExtractorError),
+    CtxExt(CtxExtractorError),
 
     ModelError(),
     Model(model::Error),
@@ -45,22 +46,26 @@ impl IntoResponse for Error {
 
 impl Error {
     pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
+        use web::Error::*;
+
         #[allow(unreachable_patterns)]
         match self {
-            Error::LoginFail
-            | Error::LoginFailUserNotFound
-            | Error::LoginFailUserNotValidated { .. }
-            | Error::LoginFailPasswordNotMatching { .. } => {
+            LoginFail
+            | LoginFailUserNotFound
+            | LoginFailUserNotValidated { .. }
+            | LoginFailPasswordNotMatching { .. } => {
                 (StatusCode::FORBIDDEN, ClientError::LOGIN_FAIL)
             }
 
-            Error::AuthFailNoAuthToken
-            | Error::AuthFailTokenWrongFormat
-            | Error::AuthFailNoContext => {
+            AuthFailNoAuthToken
+            | AuthFailTokenWrongFormat
+            | AuthFailNoContext => {
                 (StatusCode::FORBIDDEN, ClientError::NO_AUTH)
             }
 
-            Error::ModelError() | Error::TicketDeleteIdNotFound { .. } => {
+            CtxExt(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+
+            ModelError() | TicketDeleteIdNotFound { .. } => {
                 (StatusCode::BAD_REQUEST, ClientError::INVALID_PARAMS)
             }
 
@@ -69,6 +74,12 @@ impl Error {
                 ClientError::SERVICE_ERROR,
             ),
         }
+    }
+}
+
+impl From<CtxExtractorError> for Error {
+    fn from(value: CtxExtractorError) -> Self {
+        Self::CtxExt(value)
     }
 }
 
@@ -85,7 +96,8 @@ impl From<crypt::Error> for Error {
 }
 
 impl core::fmt::Display for Error {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter)
+        -> core::result::Result<(), core::fmt::Error> {
         write!(f, "{:?}", self)
     }
 }
