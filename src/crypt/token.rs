@@ -2,9 +2,11 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use crate::config;
 use crate::crypt::{encrypt_into_b64u, EncryptContent, Error, Result};
-use crate::utils::{b64u_decode, b64u_encode, now_utc, now_utc_plus_sec_str, parse_utc};
+use crate::utils::time_utils::{now_utc, now_utc_plus_sec_str, parse_utc};
+use crate::utils::base64_utils::{b64u_decode_to_string, b64u_encode};
 
 // string format: `id_b64u.exp_b64u.sign_b64u`
+#[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug)]
 pub struct Token {
     pub identifier: String,
@@ -25,8 +27,8 @@ impl FromStr for Token {
         let (ident, exp, sign) = (splits[0], splits[1], splits[2]);
 
         Ok(Self {
-            identifier: b64u_decode(ident).map_err(|_| Error::TokenCannotDecodeIdentifier)?,
-            expiration: b64u_decode(exp).map_err(|_| Error::TokenCannotDecodeExpiration)?,
+            identifier: b64u_decode_to_string(ident).map_err(|_| Error::TokenCannotDecodeIdentifier)?,
+            expiration: b64u_decode_to_string(exp).map_err(|_| Error::TokenCannotDecodeExpiration)?,
             signature: sign.to_string(),
         })
     }
@@ -99,7 +101,7 @@ fn _token_sign_into_b64u(
     let content = format!("{}.{}", b64u_encode(identifier), b64u_encode(expiration));
     let signature = encrypt_into_b64u(key, &EncryptContent {
         content,
-        salt: salt.to_string()
+        salt: salt.to_string(),
     })?;
 
     Ok(signature)
@@ -141,7 +143,7 @@ mod tests {
 
         let token = Token::from_str(fx_token_str)?;
 
-        assert_eq!(format!("{token:?}"), format!("{fx_token:?}"));
+        assert_eq!(token, fx_token);
 
         Ok(())
     }
@@ -153,7 +155,7 @@ mod tests {
         let fx_exp = 0.02;
 
         let token_key = &config().TOKEN_KEY;
-        let fx_token = _generate_token(fx_user,fx_exp,fx_salt,token_key)?;
+        let fx_token = _generate_token(fx_user, fx_exp, fx_salt, token_key)?;
 
         thread::sleep(Duration::from_millis(10));
         let res = validate_web_token(&fx_token, fx_salt);
@@ -170,7 +172,7 @@ mod tests {
         let fx_exp = 0.02;
 
         let token_key = &config().TOKEN_KEY;
-        let fx_token = _generate_token(fx_user,fx_exp,fx_salt,token_key)?;
+        let fx_token = _generate_token(fx_user, fx_exp, fx_salt, token_key)?;
 
         thread::sleep(Duration::from_millis(30));
         let res = validate_web_token(&fx_token, fx_salt);

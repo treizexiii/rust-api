@@ -1,5 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 use axum::http::{Method, Uri};
+use log::info;
 use serde_json::{json, Value};
 use serde_with::serde_derive::Serialize;
 use serde_with::skip_serializing_none;
@@ -65,7 +66,7 @@ pub async fn log_request(
         error_data,
     };
 
-    debug!("LOG_REQUEST: \n{}", json!(log_line));
+    info!("LOG_REQUEST: \n{}", json!(log_line));
 
     Ok(())
 }
