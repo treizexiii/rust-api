@@ -3,36 +3,23 @@ use crate::pwd;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use std::fmt::Formatter;
+use derive_more::From;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[serde_as]
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, From)]
 pub enum Error {
+    #[from]
     Pwd(pwd::Error),
+    #[from]
     Store(store::Error),
 
     EntityNotFound { entity: &'static str, id: i64 },
     TicketDeleteIdNotFound { id: u64 },
+
+    #[from]
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
-}
-
-impl From<pwd::Error> for Error {
-    fn from(value: pwd::Error) -> Self {
-        Self::Pwd(value)
-    }
-}
-
-impl From<sqlx::Error> for Error {
-    fn from(value: sqlx::Error) -> Self {
-        Self::Sqlx(value)
-    }
-}
-
-impl From<store::Error> for Error {
-    fn from(value: store::Error) -> Self {
-        Self::Store(value)
-    }
 }
 
 impl core::fmt::Display for Error {

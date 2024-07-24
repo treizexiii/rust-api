@@ -1,6 +1,5 @@
 #![allow(unused)]
 
-mod config;
 mod pwd;
 mod token;
 mod ctx;
@@ -11,9 +10,9 @@ mod web;
 mod utils;
 
 pub mod _dev_utils;
+pub mod config;
 
 pub use self::error::{Error, Result};
-pub use config::config;
 use model::ticket::TicketRepository;
 
 use crate::ctx::Ctx;

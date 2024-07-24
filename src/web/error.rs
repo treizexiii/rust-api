@@ -2,13 +2,16 @@ use std::sync::Arc;
 use crate::{model, web, pwd, token};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
+use derive_more::From;
 use serde::Serialize;
+use serde_with::{serde_as, DisplayFromStr};
 use tracing::debug;
 use crate::web::middlewares::auth::CtxExtractorError;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Debug, Serialize, strum_macros::AsRefStr)]
+#[serde_as]
+#[derive(Debug, Serialize, From, strum_macros::AsRefStr)]
 #[serde(tag = "type", content = "data")]
 pub enum Error {
     LoginFail,
@@ -23,6 +26,7 @@ pub enum Error {
 
     TicketDeleteIdNotFound { id: u64 },
 
+    #[from]
     CtxExt(CtxExtractorError),
 
     RpcMethodUnknown(String),
@@ -30,12 +34,15 @@ pub enum Error {
     RpcFailJsonParams { rpc_method: String },
 
     ModelError(),
+    #[from]
     Model(model::Error),
+    #[from]
     Pwd(pwd::Error),
+    #[from]
     Token(token::Error),
 
-    SerdeJson(String),
-}
+    #[from]
+    SerdeJson(#[serde_as(as = "DisplayFromStr")] serde_json::Error),}
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
@@ -85,36 +92,6 @@ impl Error {
                 ClientError::SERVICE_ERROR,
             ),
         }
-    }
-}
-
-impl From<CtxExtractorError> for Error {
-    fn from(value: CtxExtractorError) -> Self {
-        Self::CtxExt(value)
-    }
-}
-
-impl From<model::Error> for Error {
-    fn from(value: model::Error) -> Self {
-        Self::Model(value)
-    }
-}
-
-impl From<token::Error> for Error {
-    fn from(value: token::Error) -> Self {
-        Self::Token(value)
-    }
-}
-
-impl From<pwd::Error> for Error {
-    fn from(value: pwd::Error) -> Self {
-        Self::Pwd(value)
-    }
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(value: serde_json::Error) -> Self {
-        Self::SerdeJson(value.to_string())
     }
 }
 

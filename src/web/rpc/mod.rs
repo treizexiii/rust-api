@@ -9,30 +9,17 @@ use crate::ctx::Ctx;
 use crate::model::DbContext;
 use crate::web::{Error, Result};
 use crate::web::rpc::task_rpc::{create_task, delete_task, get_task, list_task, update_task};
+use params::*;
 
+mod params;
 mod task_rpc;
+
 
 #[derive(Deserialize)]
 struct RpcRequest {
     id: Option<Value>,
     method: String,
     params: Option<Value>,
-}
-
-#[derive(Deserialize)]
-pub struct ParamsForCreate<D> {
-    data: D,
-}
-
-#[derive(Deserialize)]
-pub struct ParamsForUpdate<D> {
-    id: i64,
-    data: D,
-}
-
-#[derive(Deserialize)]
-pub struct ParamsId {
-    id: i64,
 }
 
 pub fn routes(db_context: DbContext) -> Router {

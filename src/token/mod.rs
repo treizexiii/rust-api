@@ -12,6 +12,7 @@ use sha2::Sha512;
 use std::fmt::Display;
 use std::str::FromStr;
 use uuid::Uuid;
+use crate::config::config;
 
 /// String format: `ident_b64u.exp_b64u.sign_b64u`
 #[derive(Debug)]

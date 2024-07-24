@@ -1,22 +1,15 @@
 use std::fmt::Formatter;
+use derive_more::From;
 use crate::model;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Debug)]
+#[derive(Debug, From)]
 pub enum Error {
-    ConfigMissingEnv(&'static str),
-    ConfigInvalidFormat(&'static str),
-
+    #[from]
     Model(model::Error),
 
     FailToCreatePool { msg: String },
-}
-
-impl From<model::Error> for Error {
-    fn from(val: model::Error) -> Self {
-        Self::Model(val)
-    }
 }
 
 impl core::fmt::Display for Error {

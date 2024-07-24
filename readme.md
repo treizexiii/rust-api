@@ -2,6 +2,17 @@
 
 ## Development
 
+### Setup
+
+Create env with config.toml or on container's config
+
+````dotenv
+SERVICE_DB_URL=
+SERVICE_PWD_KEY=
+SERVICE_TOKEN_KEY=
+SERVICE_TOKEN_DURATION_SEC=
+````
+
 ### Tools
 
 ```bash

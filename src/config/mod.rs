@@ -1,7 +1,10 @@
-use std::{env, str::FromStr};
+mod error;
+
+use std::env;
+use std::str::FromStr;
 use std::sync::OnceLock;
-use crate::{Error, Result};
 use crate::utils::base64_utils::b64u_decode;
+pub use self::error::{Error, Result};
 
 pub fn config() -> &'static Config {
     static INSTANCE: OnceLock<Config> = OnceLock::new();

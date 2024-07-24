@@ -8,7 +8,7 @@ use serde::Deserialize;
 use tower_http::services::ServeDir;
 use tracing::log::debug;
 use crate::config;
-
+use crate::config::config;
 // pub fn routes_static() -> Router {
 //     Router::new()
 //         .nest_service("/", get_service(ServeDir::new("./")))

@@ -3,9 +3,9 @@ mod hmac_hasher;
 
 pub use self::error::{Error, Result};
 
-use crate::config;
 use crate::pwd::hmac_hasher::hmac_sha512_hash;
 use uuid::Uuid;
+use crate::config::config;
 
 pub struct ContentToHash {
     pub content: String,
