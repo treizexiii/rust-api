@@ -29,10 +29,23 @@ lazy-regex = "3.1.0"
 strum_macros = "0.26.4"
 uuid = { version = "1.8.0", features = ["v4", "fast-rng"] }
 time = "0.3"
-sqlx = { version = "0.7", features = ["macros", "runtime-tokio-rustls", "postgres", "uuid", "time"] }
-sqlb = "0.4"
+
+sqlx = { version = "0.7", features = [
+    "macros",
+    "runtime-tokio-rustls",
+    "postgres",
+    "uuid",
+    "time",
+] }
+sea-query = "0.30"
+sea-query-binder = { version = "0.5", features = [
+    "sqlx-postgres",
+    "with-uuid",
+] }
+modql = { version = "0.3", features = ["with-sea-query"] }
+
 log = "0.4.21"
-derive_more = {version = "1.0.0-beta", features = ["from"] }
+derive_more = { version = "1.0.0-beta", features = ["from"] }
 
 [dev-dependencies]
 anyhow = "1"

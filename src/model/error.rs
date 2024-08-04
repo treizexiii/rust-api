@@ -1,4 +1,4 @@
-use crate::{model::store};
+use crate::model::store;
 use crate::pwd;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
@@ -20,6 +20,8 @@ pub enum Error {
 
     #[from]
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
+    #[from]
+    SeaQuery(#[serde_as(as = "DisplayFromStr")] sea_query::error::Error)
 }
 
 impl core::fmt::Display for Error {
