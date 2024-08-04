@@ -5,8 +5,12 @@ use crate::model::base::{self, Repository};
 use crate::model::DbContext;
 use crate::model::Result;
 use crate::pwd::{self, ContentToHash};
+use hmac::digest::typenum::Exp;
+use modql::field::{Field, Fields, HasFields};
+use sea_query::{Expr, Iden, PostgresQueryBuilder, Query, SimpleExpr};
+use sea_query_binder::SqlxBinder;
+use serde::de::value;
 use serde::{Deserialize, Serialize};
-use sqlb::{Field, Fields, HasFields};
 use sqlx::postgres::PgRow;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -52,6 +56,13 @@ impl UserBy for User {}
 impl UserBy for UserForLogin {}
 impl UserBy for UserForAuth {}
 
+#[derive(Iden)]
+pub enum UserIden {
+    Id,
+    Username,
+    Pwd,
+}
+
 pub struct UserRepository;
 
 impl Repository for UserRepository {
@@ -76,11 +87,14 @@ impl UserRepository {
     {
         let db = db_context.db();
 
-        let user = sqlb::select()
-            .table(Self::TABLE)
-            .and_where_eq("username", username)
-            .fetch_optional::<_, E>(db)
-            .await?;
+        let mut query = Query::select();
+        query
+            .from(Self::table())
+            .columns(E::field_idens())
+            .and_where(Expr::col(UserIden::Username).eq(username));
+
+        let (sql, values) = query.build_sqlx(PostgresQueryBuilder);
+        let user = sqlx::query_as_with(&sql, values).fetch_optional(db).await?;
 
         Ok(user)
     }
@@ -100,13 +114,18 @@ impl UserRepository {
             salt: user.pwd_salt,
         })?;
 
-        sqlb::update()
-            .table(Self::TABLE)
-            .and_where_eq("id", id)
-            .data(vec![("pwd", pwd.to_string()).into()])
-            .exec(db)
-            .await?;
+        let mut query = Query::update();
+        query
+            .table(Self::table())
+            .value(UserIden::Pwd, SimpleExpr::from(pwd))
+            .and_where(Expr::col(UserIden::Id).eq(id));
 
+        let (sql, values) = query.build_sqlx(PostgresQueryBuilder);
+        let _count = sqlx::query_with(&sql, values)
+            .execute(db)
+            .await?
+            .rows_affected();
+        
         Ok(())
     }
 }
