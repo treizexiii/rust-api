@@ -35,7 +35,7 @@ cargo watch -q -c -w examples/ -x "test -q quick_dev -- --nocapture"
 ### Start db
 
 ```bash
-docker run -d --rm --name postgres -p 5434:5432 -e POSTGRES_PASSWORD=welcome postgres:15
+docker run -d --rm --name postgres-rust -p 5434:5432 -e POSTGRES_PASSWORD=welcome postgres:16
 ```
 
 start pg terminal
